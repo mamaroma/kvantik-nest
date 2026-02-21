@@ -1,4 +1,5 @@
-import { Controller, Get, Query, Render } from '@nestjs/common';
+import { Controller, Get, Query, Render, Res } from '@nestjs/common';
+import { Response } from 'express';
 
 function sessionFromQuery(query: { auth?: string; user?: string }) {
   const isAuthed = query.auth === '1' || query.auth === 'true';
@@ -12,6 +13,16 @@ function sessionFromQuery(query: { auth?: string; user?: string }) {
 @Controller()
 export class AppController {
   @Get('/')
+  root(@Query() query: { auth?: string; user?: string }, @Res() res: Response) {
+    const q = new URLSearchParams();
+    if (query.auth) q.set('auth', query.auth);
+    if (query.user) q.set('user', query.user);
+    const suffix = q.toString() ? `?${q.toString()}` : '';
+    return res.redirect(`/about${suffix}`);
+  }
+
+  // MVC-версия главной страницы (шаблонизированная)
+  @Get('/mvc')
   @Render('index')
   getIndex(@Query() query: { auth?: string; user?: string }) {
     return {
