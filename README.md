@@ -1,6 +1,13 @@
 # Квантик — NestJS + Render
 
-Автор: **<YOUR_NAME>** (<YOUR_EMAIL>)
+# Kvantik Nest (LR1)
+
+Автор: Арсений Краковский, группа м3306
+
+NestJS-приложение с деплоем на Render, подключением MVC (EJS) и отдачей статических файлов из public.
+Реализованы шаблоны и partials (header/menu/footer/session) + страницы index/articles.
+
+Демо: https://kvantik-nest.onrender.com
 
 ## Описание
 
