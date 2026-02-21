@@ -1,0 +1,132 @@
+// ЛР2: доменная модель для научно‑популярного журнала «Квантик»
+// ORM: Prisma + PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Пользователь сайта (читатель/автор/админ)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  role      UserRole @default(READER)
+  createdAt DateTime @default(now())
+
+  // Relations
+  articles  Article[]
+  comments  Comment[]
+  likes     Like[]
+}
+
+// Статья журнала
+model Article {
+  id          String        @id @default(uuid())
+  title       String
+  slug        String        @unique
+  summary     String?
+  content     String
+  status      ArticleStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  topicId String
+  topic   Topic  @relation(fields: [topicId], references: [id], onDelete: Restrict)
+
+  tags      ArticleTag[]
+  comments  Comment[]
+  media     MediaAsset[]
+  likes     Like[]
+}
+
+// Тема/раздел (например «Физика», «Математика», «ИТ»)
+model Topic {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String?
+
+  // Relations
+  articles Article[]
+}
+
+// Тег (для многозначной классификации статей)
+model Tag {
+  id    String @id @default(uuid())
+  title String
+  slug  String @unique
+
+  // Relations
+  articles ArticleTag[]
+}
+
+// Join table для many-to-many Article <-> Tag
+model ArticleTag {
+  articleId String
+  tagId     String
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+}
+
+// Комментарий читателя к статье
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  createdAt DateTime @default(now())
+
+  // Relations
+  articleId String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User    @relation(fields: [authorId], references: [id], onDelete: Restrict)
+}
+
+// Медиа‑объект (картинка/схема) — можно привязать к статье
+model MediaAsset {
+  id        String   @id @default(uuid())
+  url       String
+  caption   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  articleId String?
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+// Лайк статьи пользователем
+model Like {
+  userId    String
+  articleId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+}
+
+enum UserRole {
+  READER
+  AUTHOR
+  ADMIN
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}

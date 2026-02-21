@@ -1,19 +1,29 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    app.useStaticAssets(join(process.cwd(), 'public'), {
-        index: false,
-    });
+  // Static assets (CSS/JS/images)
+  // Важно: index:false, иначе Express отдаст public/index.html на "/" и перекроет контроллер.
+  app.useStaticAssets(join(process.cwd(), 'public'), { index: false });
 
-    app.setBaseViewsDir(join(process.cwd(), 'views'));
-    app.setViewEngine('ejs');
+  // Views (EJS templates)
+  app.setBaseViewsDir(join(process.cwd(), 'views'));
+  app.setViewEngine('ejs');
 
-    const port = process.env.PORT ? Number(process.env.PORT) : 3000;
-    await app.listen(port, '0.0.0.0');
+  // Graceful shutdown for Prisma
+  const prismaService = app.get(PrismaService);
+  await prismaService.enableShutdownHooks(app);
+
+  const configService = app.get(ConfigService);
+  const port = Number(configService.get('PORT') ?? 3000);
+
+  await app.listen(port, '0.0.0.0');
 }
+
 bootstrap();

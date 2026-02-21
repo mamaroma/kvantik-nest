@@ -33,3 +33,39 @@ npm run start:dev
 ```bash
 PORT=4000 npm run start:dev
 ```
+
+---
+
+# ЛР2 — доменная модель + PostgreSQL
+
+## Подключение базы
+
+1) Создай PostgreSQL (Render или Aiven).
+2) Добавь переменную окружения `DATABASE_URL` в Render (Internal Database URL).
+3) Для локальной разработки создай `.env` на основе `.env.example` и вставь External Database URL.
+
+## ORM (Prisma)
+
+Схема находится в `prisma/schema.prisma`.
+
+Команды:
+
+```bash
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+```
+
+Для Render (production) используй миграции:
+
+```bash
+npm run prisma:migrate:deploy
+```
+
+Проверка подключения (на запущенном сервере):
+
+- `GET /db/ping`
+
+## ER-диаграмма
+
+Экспортируй ER-диаграмму (DataGrip/WebStorm) в файл, положи в корень репозитория (например `er-diagram.png`) и вставь изображение в README.
