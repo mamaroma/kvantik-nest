@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Brawl Pirates</title>
+    <link rel="stylesheet" href="style.LWLpV.css">
+    <script defer="defer" src="../844216bb0901a15527e5.bundle.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<div id="portal-root"></div>
+<div class="container preloader">
+    <div class="wrapper logo"><img class="logo" src="assets/logo.svg" alt="">
+        <div class="coin"></div>
+    </div>
+    <div class="wrapper game-logo"><img src="" alt=""></div>
+</div>
+<script>function isMxDomain() {
+    const location = window.location
+    if (location) {
+        let exitUrlParam = new URL(location.toString()).searchParams.get('exitUrl')
+        if (exitUrlParam) {
+            let exitUrl = null
+
+            try {
+                try {
+                    exitUrl = new URL(exitUrlParam)
+                } catch (e) {
+                    exitUrl = new URL(decodeURIComponent(exitUrlParam))
+                }
+            } catch {
+                return /^.*\.mx$/ig.test(exitUrlParam)
+            }
+
+            if (exitUrl?.hostname.includes(".mx")) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+if (isMxDomain()) {
+    document.body.classList.add('mx')
+}</script>
+</body>
+</html>

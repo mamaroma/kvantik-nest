@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Квантик — Конструктор расписания (Svelte)</title>
+
+    <!-- Общие стили сайта -->
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- Общий JS сайта (навигация, активные пункты и т.п.) -->
+    <script src="js/site.js" defer></script>
+</head>
+<body>
+
+<header class="site-header" role="banner">
+    <div class="logo-block">
+        <a href="index.html">
+            <img src="images/logo.jpg" alt="Логотип журнала «Квантик»" />
+        </a>
+        <h1>Квантик — научно-популярный журнал</h1>
+    </div>
+
+    <nav class="main-nav" aria-label="Основная навигация">
+        <ul>
+            <li><a href="articles.html">Статьи</a></li>
+            <li><a href="topics.html">Темы</a></li>
+            <li><a href="gallery.html">Галерея</a></li>
+            <li><a href="news.html">Лента</a></li>
+            <li><a href="table.html">Таблица</a></li>
+            <li><a href="code.html">Код</a></li>
+            <li><a href="builder.html" class="active">Конструктор</a></li>
+            <li><a href="about.html">О нас</a></li>
+            <li><a href="contacts.html">Контакты</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="section-pad">
+    <!-- СЮДА МОНТИРУЕТСЯ SVELTE -->
+    <div id="app"></div>
+</main>
+
+<footer id="contacts">
+    <h2>Контакты</h2>
+    <address>Редакция «Квантик», hello@kvantik.example</address>
+    <p>&copy; <time datetime="2025">2025</time> «Квантик»</p>
+</footer>
+
+<script type="module" src="svelte-builder/dist/assets/index-CDT6_gpw.js"></script>
+</body>
+</html>

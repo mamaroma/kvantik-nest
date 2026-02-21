@@ -1,0 +1,24 @@
+<%
+  const pageToPath = {
+    index: '/',
+    articles: '/articles',
+    topics: '/topics',
+    gallery: '/gallery',
+    news: '/news',
+    table: '/table',
+    snippet: '/code',
+    builder: '/builder',
+    about: '/about',
+    contacts: '/contacts',
+  };
+  const currentPath = pageToPath[activePage] || '/';
+%>
+<div class="session-info">
+  <% if (session?.isAuthed) { %>
+    <span>Вы вошли как <strong><%= session.user %></strong></span>
+    <a class="btn-link" href="<%= currentPath %>">Выйти</a>
+  <% } else { %>
+    <a class="btn-link" href="<%= currentPath %>?auth=1&user=Angelina">Войти</a>
+    <a class="btn-link" href="<%= currentPath %>?auth=1&user=Angelina">Регистрация</a>
+  <% } %>
+</div>

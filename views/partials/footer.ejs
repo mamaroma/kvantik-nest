@@ -1,0 +1,23 @@
+<footer id="contacts">
+  <h2>Контакты</h2>
+  <address>
+    Редакция «Квантик»<br />
+    ул. Академическая, д. 1, Новосибирск, Россия<br />
+    Email: <a href="mailto:hello@kvantik.example">hello@kvantik.example</a><br />
+    Тел.: +7 (999) 123-45-67
+  </address>
+  <p>Координаты: 55.0302 N, 82.9204 E</p>
+
+  <div class="footer-banner" aria-label="Реклама">
+    <p>Рекламный баннер • Спонсор выпуска</p>
+  </div>
+
+  <p>&copy; <time datetime="2025">2025</time> «Квантик». Все права защищены.</p>
+  <nav aria-label="Навигация подвала">
+    <ul>
+      <li><a href="#top">Наверх</a></li>
+      <li><a href="/about<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>">О проекте</a></li>
+      <li><a href="/topics<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>">Темы</a></li>
+    </ul>
+  </nav>
+</footer>

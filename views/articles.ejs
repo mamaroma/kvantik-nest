@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+  <%- include('partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('partials/header', { activePage, session }) %>
+
+  <main class="section-pad">
+    <h2>Свежие статьи</h2>
+
+    <% articles.forEach((item) => { %>
+      <%- include('partials/article-card', { item }) %>
+    <% }) %>
+  </main>
+
+  <%- include('partials/footer', { session }) %>
+</body>
+</html>

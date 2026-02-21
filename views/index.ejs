@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+  <%- include('partials/head', { pageTitle }) %>
+  <meta name="description" content="Научно-популярный онлайн-журнал: статьи, заметки, интервью с учёными, эксперименты." />
+  <meta name="keywords" content="наука, журнал, статьи, физика, биология, космос, технологии" />
+  <link rel="preload" href="/images/logo.jpg" as="image" />
+</head>
+<body>
+  <%- include('partials/header', { activePage, session }) %>
+
+  <main>
+    <section aria-labelledby="welcome">
+      <h2 id="welcome">Добро пожаловать!</h2>
+      <p>Мы объясняем сложное простыми словами. Ниже — пара свежих материалов, а всё остальное ищите по разделам.</p>
+
+      <% featured.forEach((item) => { %>
+        <%- include('partials/article-card', { item }) %>
+      <% }) %>
+    </section>
+
+    <aside aria-labelledby="aside-heading">
+      <h2 id="aside-heading">Подписка</h2>
+      <p>Оставьте email — пришлём лучшие статьи раз в неделю.</p>
+      <form action="#" method="post" novalidate>
+        <label for="name">Имя</label>
+        <input id="name" name="name" type="text" placeholder="Иван" autocomplete="name" />
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" />
+        <button type="submit">Подписаться</button>
+        <p class="visually-hidden" role="status" aria-live="polite"> </p>
+      </form>
+    </aside>
+  </main>
+
+  <%- include('partials/footer', { session }) %>
+</body>
+</html>

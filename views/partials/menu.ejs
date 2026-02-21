@@ -1,0 +1,11 @@
+<ul>
+  <li><a href="/articles<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>" data-page="articles" class="<%= activePage==='articles' ? 'active' : '' %>">Статьи</a></li>
+  <li><a href="/topics<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>" data-page="topics" class="<%= activePage==='topics' ? 'active' : '' %>">Темы</a></li>
+  <li><a href="/gallery<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>" data-page="gallery" class="<%= activePage==='gallery' ? 'active' : '' %>">Галерея</a></li>
+  <li><a href="/news<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>" data-page="news" class="<%= activePage==='news' ? 'active' : '' %>">Лента</a></li>
+  <li><a href="/table<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>" data-page="table" class="<%= activePage==='table' ? 'active' : '' %>">Таблица</a></li>
+  <li><a href="/code<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>" data-page="snippet" class="<%= activePage==='snippet' ? 'active' : '' %>">Код</a></li>
+  <li><a href="/builder<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>" data-page="builder" class="<%= activePage==='builder' ? 'active' : '' %>">Конструктор</a></li>
+  <li><a href="/about<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>" data-page="about" class="<%= activePage==='about' ? 'active' : '' %>">О нас</a></li>
+  <li><a href="/contacts<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>" data-page="contacts" class="<%= activePage==='contacts' ? 'active' : '' %>">Контакты</a></li>
+</ul>

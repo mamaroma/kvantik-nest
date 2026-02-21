@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+  <%- include('partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('partials/header', { activePage, session }) %>
+
+  <main class="section-pad">
+    <!-- Временно вставляем статическую страницу из прошлого семестра. -->
+    <iframe
+      title="content"
+      src="/html/<%= htmlFile %>"
+      style="width:100%; min-height: 80vh; border:0;"
+      loading="lazy"></iframe>
+  </main>
+
+  <%- include('partials/footer', { session }) %>
+</body>
+</html>
