@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+  <%- include('../partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('../partials/header', { activePage, session }) %>
+
+  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
+
+  <main class="section-pad">
+    <div class="kv-actions">
+      <h2>Статьи</h2>
+      <a class="btn" href="/articles/add<%= suffix %>">+ Добавить</a>
+    </div>
+
+    <p class="muted">Обновления в реальном времени включены (SSE). Откройте эту страницу в двух вкладках и добавьте/измените статью — появится уведомление.</p>
+
+    <% if (!articles.length) { %>
+      <p>Пока нет статей. Нажмите «Добавить».</p>
+    <% } %>
+
+    <% articles.forEach((a) => { %>
+      <article class="card article-card">
+        <header class="article-card__head">
+          <h3 class="article-card__title">
+            <a href="/articles/<%= a.id %><%= suffix %>"><%= a.title %></a>
+          </h3>
+          <div class="article-card__meta">
+            <span class="chip"><%= a.status %></span>
+            <span class="muted"><%= a.topic?.title || '—' %></span>
+            <span class="muted">•</span>
+            <span class="muted"><%= a.author?.name || '—' %></span>
+          </div>
+        </header>
+        <% if (a.summary) { %>
+          <p><%= a.summary %></p>
+        <% } else { %>
+          <p class="muted">(без краткого описания)</p>
+        <% } %>
+
+        <div class="kv-actions">
+          <a class="btn btn--ghost" href="/articles/<%= a.id %>/edit<%= suffix %>">Редактировать</a>
+          <form method="POST" action="/articles/<%= a.id %>?_method=DELETE<%= suffix ? '&' + suffix.slice(1) : '' %>" onsubmit="return confirm('Удалить статью?');">
+            <button class="btn btn--danger" type="submit">Удалить</button>
+          </form>
+        </div>
+      </article>
+    <% }) %>
+
+    <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+  </main>
+
+  <script src="/js/sse-articles.js"></script>
+  <%- include('../partials/footer', { session }) %>
+</body>
+</html>

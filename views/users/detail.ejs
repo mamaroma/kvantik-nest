@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+  <%- include('../partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('../partials/header', { activePage, session }) %>
+
+  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
+
+  <main class="section-pad">
+    <% if (!user) { %>
+      <h2>Пользователь не найден</h2>
+      <a class="btn" href="/users<%= suffix %>">К списку</a>
+    <% } else { %>
+      <div class="kv-actions">
+        <h2><%= user.name %></h2>
+        <div class="kv-actions">
+          <a class="btn btn--ghost" href="/users/<%= user.id %>/edit<%= suffix %>">Редактировать</a>
+          <form method="POST" action="/users/<%= user.id %>?_method=DELETE<%= suffix ? '&' + suffix.slice(1) : '' %>" onsubmit="return confirm('Удалить пользователя?');">
+            <button class="btn btn--danger" type="submit">Удалить</button>
+          </form>
+        </div>
+      </div>
+
+      <p><strong>Email:</strong> <%= user.email %></p>
+      <p><strong>Роль:</strong> <%= user.role %></p>
+
+      <div class="kv-actions">
+        <a class="btn" href="/users<%= suffix %>">К списку</a>
+      </div>
+    <% } %>
+  </main>
+
+  <%- include('../partials/footer', { session }) %>
+</body>
+</html>

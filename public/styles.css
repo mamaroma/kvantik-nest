@@ -231,3 +231,29 @@ footer nav ul{
     /* Форма комментариев — одна колонка */
     .comment-form{ grid-template-columns:1fr; }
 }
+
+/* ========== MVC CRUD: кнопки/формы/карточки ========== */
+.kv-actions{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.kv-form{ display:grid; gap:12px; max-width:860px; }
+.kv-form label{ display:grid; gap:6px; }
+.kv-form input, .kv-form textarea, .kv-form select{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid rgba(0,0,0,.15);
+  border-radius:10px;
+  background:#fff;
+}
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 12px; border-radius:12px; border:1px solid rgba(0,0,0,.18); background:#fff; cursor:pointer; text-decoration:none; }
+.btn:hover{ filter:brightness(0.98); }
+.btn--ghost{ background:transparent; }
+.btn--danger{ border-color: rgba(180,0,0,.35); }
+.chip{ display:inline-flex; padding:2px 8px; border-radius:999px; border:1px solid rgba(0,0,0,.14); font-size:0.85rem; }
+.muted{ opacity:.75; }
+.grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; }
+.card{ padding:14px; border-radius:14px; border:1px solid rgba(0,0,0,.12); background:#fff; box-shadow:0 1px 0 rgba(0,0,0,.04); }
+.article-content{ white-space:pre-wrap; font:inherit; line-height:1.55; }
+
+/* ========== Toast (SSE) ========== */
+.toast-root{ position:fixed; right:16px; bottom:16px; display:flex; flex-direction:column; gap:10px; z-index:9999; }
+.toast{ max-width:min(420px, calc(100vw - 32px)); padding:12px 14px; border-radius:14px; border:1px solid rgba(0,0,0,.14); background:#fff; box-shadow:0 10px 30px rgba(0,0,0,.12); transform:translateY(8px); opacity:0; transition:opacity .2s ease, transform .2s ease; }
+.toast--show{ transform:translateY(0); opacity:1; }

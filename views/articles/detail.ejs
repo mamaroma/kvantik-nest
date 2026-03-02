@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+  <%- include('../partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('../partials/header', { activePage, session }) %>
+
+  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
+
+  <main class="section-pad">
+    <% if (!article) { %>
+      <h2>Статья не найдена</h2>
+      <a class="btn" href="/articles<%= suffix %>">К списку</a>
+    <% } else { %>
+      <div class="kv-actions">
+        <h2><%= article.title %></h2>
+        <div class="kv-actions">
+          <a class="btn btn--ghost" href="/articles/<%= article.id %>/edit<%= suffix %>">Редактировать</a>
+          <form method="POST" action="/articles/<%= article.id %>?_method=DELETE<%= suffix ? '&' + suffix.slice(1) : '' %>" onsubmit="return confirm('Удалить статью?');">
+            <button class="btn btn--danger" type="submit">Удалить</button>
+          </form>
+        </div>
+      </div>
+
+      <p class="muted">
+        <span class="chip"><%= article.status %></span>
+        <span class="muted">•</span>
+        <strong><%= article.topic?.title || '—' %></strong>
+        <span class="muted">•</span>
+        <span><%= article.author?.name || '—' %></span>
+      </p>
+
+      <% if (article.summary) { %>
+        <p><%= article.summary %></p>
+      <% } %>
+
+      <hr />
+      <pre class="article-content"><%= article.content %></pre>
+
+      <div class="kv-actions">
+        <a class="btn" href="/articles<%= suffix %>">К списку</a>
+      </div>
+    <% } %>
+  </main>
+
+  <%- include('../partials/footer', { session }) %>
+</body>
+</html>

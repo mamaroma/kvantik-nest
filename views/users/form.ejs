@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+  <%- include('../partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('../partials/header', { activePage, session }) %>
+
+  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
+  <% const isEdit = mode === 'edit'; %>
+  <% const actionUrl = isEdit
+    ? (`/users/${user.id}?_method=PATCH${suffix ? '&' + suffix.slice(1) : ''}`)
+    : (`/users${suffix}`);
+  %>
+
+  <main class="section-pad">
+    <h2><%= isEdit ? 'Редактирование пользователя' : 'Новый пользователь' %></h2>
+
+    <form class="kv-form" method="POST" action="<%= actionUrl %>">
+      <label>
+        Имя
+        <input name="name" required value="<%= user?.name || '' %>" />
+      </label>
+
+      <label>
+        Email
+        <input type="email" name="email" required value="<%= user?.email || '' %>" />
+      </label>
+
+      <label>
+        Роль
+        <select name="role">
+          <% roles.forEach((r) => { %>
+            <option value="<%= r %>" <%= (user?.role === r) ? 'selected' : '' %>><%= r %></option>
+          <% }) %>
+        </select>
+      </label>
+
+      <div class="kv-actions">
+        <button class="btn" type="submit"><%= isEdit ? 'Сохранить' : 'Создать' %></button>
+        <a class="btn btn--ghost" href="/users<%= suffix %>">Отмена</a>
+      </div>
+    </form>
+  </main>
+
+  <%- include('../partials/footer', { session }) %>
+</body>
+</html>

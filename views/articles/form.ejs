@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+    <%- include('../partials/head', { pageTitle }) %>
+</head>
+<body>
+<%- include('../partials/header', { activePage, session }) %>
+
+<% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
+<% const isEdit = mode === 'edit'; %>
+<% const actionUrl = isEdit
+        ? (`/articles/${article.id}?_method=PATCH${suffix ? '&' + suffix.slice(1) : ''}`)
+        : (`/articles${suffix}`);
+%>
+
+<main class="section-pad">
+    <h2><%= isEdit ? 'Редактирование статьи' : 'Новая статья' %></h2>
+
+    <% if (typeof error === 'string' && error) { %>
+        <div class="kv-alert kv-alert--error" style="margin: 12px 0; padding: 12px; border-radius: 10px;">
+            <strong>Ошибка:</strong> <%= error %>
+        </div>
+    <% } %>
+
+    <form class="kv-form" method="POST" action="<%= actionUrl %>">
+        <label>
+            Заголовок
+            <input name="title" required value="<%= article?.title || '' %>" />
+        </label>
+
+        <label>
+            Slug (опционально)
+            <input name="slug" value="<%= article?.slug || '' %>" />
+        </label>
+
+        <label>
+            Краткое описание
+            <textarea name="summary" rows="3"><%= article?.summary || '' %></textarea>
+        </label>
+
+        <label>
+            Тема
+            <select name="topicId" required>
+                <% topics.forEach((t) => { %>
+                    <option value="<%= t.id %>" <%= (article?.topicId === t.id) ? 'selected' : '' %>><%= t.title %></option>
+                <% }) %>
+            </select>
+        </label>
+
+        <label>
+            Автор
+            <select name="authorId" required>
+                <% authors.forEach((u) => { %>
+                    <option value="<%= u.id %>" <%= (article?.authorId === u.id) ? 'selected' : '' %>><%= u.name %> (<%= u.role %>)</option>
+                <% }) %>
+            </select>
+        </label>
+
+        <label>
+            Статус
+            <select name="status">
+                <% statuses.forEach((s) => { %>
+                    <option value="<%= s %>" <%= (article?.status === s) ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+            </select>
+        </label>
+
+        <label>
+            Дата публикации (опционально)
+            <input type="datetime-local" name="publishedAt" value="<%= article?.publishedAt || '' %>" />
+        </label>
+
+        <label>
+            Текст
+            <textarea name="content" rows="12" required><%= article?.content || '' %></textarea>
+        </label>
+
+        <div class="kv-actions">
+            <button class="btn" type="submit"><%= isEdit ? 'Сохранить' : 'Создать' %></button>
+            <a class="btn btn--ghost" href="/articles<%= suffix %>">Отмена</a>
+        </div>
+    </form>
+</main>
+
+<%- include('../partials/footer', { session }) %>
+</body>
+</html>

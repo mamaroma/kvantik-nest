@@ -9,6 +9,15 @@ async function bootstrap() {
 
     app.enableShutdownHooks();
 
+    // HTML-формы поддерживают только GET/POST.
+    // Для соблюдения требований ЛР (PATCH/DELETE) используем простой method override
+    // через query ?_method=PATCH или hidden input _method=DELETE.
+    app.use((req: any, _res: any, next: any) => {
+        const m = (req.query?._method || req.body?._method) as string | undefined;
+        if (req.method === 'POST' && m) req.method = String(m).toUpperCase();
+        next();
+    });
+
     app.useStaticAssets(join(process.cwd(), 'public'), { index: false });
 
 

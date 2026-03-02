@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+  <%- include('../partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('../partials/header', { activePage, session }) %>
+
+  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
+
+  <main class="section-pad">
+    <div class="kv-actions">
+      <h2>Темы</h2>
+      <a class="btn" href="/topics/add<%= suffix %>">+ Добавить</a>
+    </div>
+
+    <% if (!topics.length) { %>
+      <p>Пока нет тем. Нажмите «Добавить».</p>
+    <% } %>
+
+    <div class="grid">
+      <% topics.forEach((t) => { %>
+        <div class="card">
+          <h3><a href="/topics/<%= t.id %><%= suffix %>"><%= t.title %></a></h3>
+          <p class="muted"><%= t.slug %></p>
+          <% if (t.description) { %>
+            <p><%= t.description %></p>
+          <% } %>
+          <div class="kv-actions">
+            <a class="btn btn--ghost" href="/topics/<%= t.id %>/edit<%= suffix %>">Редактировать</a>
+            <form method="POST" action="/topics/<%= t.id %>?_method=DELETE<%= suffix ? '&' + suffix.slice(1) : '' %>" onsubmit="return confirm('Удалить тему? Связанные статьи перестанут быть валидными.');">
+              <button class="btn btn--danger" type="submit">Удалить</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </main>
+
+  <%- include('../partials/footer', { session }) %>
+</body>
+</html>

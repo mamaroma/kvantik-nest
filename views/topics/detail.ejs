@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru" id="top">
+<head>
+  <%- include('../partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('../partials/header', { activePage, session }) %>
+
+  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
+
+  <main class="section-pad">
+    <% if (!topic) { %>
+      <h2>Тема не найдена</h2>
+      <a class="btn" href="/topics<%= suffix %>">К списку</a>
+    <% } else { %>
+      <div class="kv-actions">
+        <h2><%= topic.title %></h2>
+        <div class="kv-actions">
+          <a class="btn btn--ghost" href="/topics/<%= topic.id %>/edit<%= suffix %>">Редактировать</a>
+          <form method="POST" action="/topics/<%= topic.id %>?_method=DELETE<%= suffix ? '&' + suffix.slice(1) : '' %>" onsubmit="return confirm('Удалить тему?');">
+            <button class="btn btn--danger" type="submit">Удалить</button>
+          </form>
+        </div>
+      </div>
+
+      <p class="muted">slug: <code><%= topic.slug %></code></p>
+      <% if (topic.description) { %>
+        <p><%= topic.description %></p>
+      <% } %>
+
+      <div class="kv-actions">
+        <a class="btn" href="/topics<%= suffix %>">К списку</a>
+      </div>
+    <% } %>
+  </main>
+
+  <%- include('../partials/footer', { session }) %>
+</body>
+</html>

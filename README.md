@@ -63,3 +63,40 @@ npm run prisma:migrate:deploy
 ## ER-диаграмма
 
 ![ER Diagram](./_prisma_migrations.png)
+
+
+## ЛР3: MVC + DDD-модули + SSE
+
+Структура
+•	Поддомены вынесены в отдельные модули (DDD-подход): articles/, topics/, users/
+•	Бизнес-логика находится в *.service.ts, контроллеры отвечают за маршрутизацию и рендер шаблонов
+•	Шаблоны: views/*, общая разметка через layout/partials
+
+Маршруты (CRUD)
+
+Articles
+•	GET /articles — список
+•	GET /articles/:id — просмотр
+•	GET /articles/add — форма создания
+•	POST /articles — создание
+•	GET /articles/:id/edit — форма редактирования
+•	PATCH /articles/:id — обновление
+•	DELETE /articles/:id — удаление
+
+Topics
+•	GET /topics, GET /topics/:id, GET /topics/add, POST /topics, GET /topics/:id/edit, PATCH /topics/:id, DELETE /topics/:id
+
+Users
+•	GET /users, GET /users/:id, GET /users/add, POST /users, GET /users/:id/edit, PATCH /users/:id, DELETE /users/:id
+
+Для отправки PATCH/DELETE из HTML-форм используется ?_method=PATCH / ?_method=DELETE.
+
+SSE (обновления в реальном времени)
+•	GET /articles/sse — Server-Sent Events поток
+•	На странице /articles подключён EventSource, изменения (create/update/delete) показываются toast-уведомлениями без перезагрузки страницы.
+
+Запуск
+```bash
+npm i
+npm run start:dev
+```
