@@ -7,13 +7,13 @@ export class Topic {
   @Field(() => ID, { description: 'Уникальный идентификатор темы.' })
   id!: string;
 
-  @Field({ description: 'Название темы.' })
+  @Field(() => String, { description: 'Название темы.' })
   title!: string;
 
-  @Field({ description: 'Человекочитаемый slug темы.' })
+  @Field(() => String, { description: 'Человекочитаемый slug темы.' })
   slug!: string;
 
-  @Field({ nullable: true, description: 'Описание темы.' })
+  @Field(() => String, { nullable: true, description: 'Описание темы.' })
   description!: string | null;
 
   @Field(() => [Article], {

@@ -4,22 +4,22 @@ import { ArticleStatus } from '../enums/graphql.enums';
 
 @InputType({ description: 'Данные для создания статьи.' })
 export class CreateArticleInput {
-  @Field({ description: 'Заголовок статьи.' })
+  @Field(() => String, { description: 'Заголовок статьи.' })
   @IsString()
   @IsNotEmpty()
   title!: string;
 
-  @Field({ nullable: true, description: 'Человекочитаемый slug статьи.' })
+  @Field(() => String, { nullable: true, description: 'Человекочитаемый slug статьи.' })
   @IsOptional()
   @IsString()
   slug?: string;
 
-  @Field({ nullable: true, description: 'Краткий анонс статьи.' })
+  @Field(() => String, { nullable: true, description: 'Краткий анонс статьи.' })
   @IsOptional()
   @IsString()
   summary?: string;
 
-  @Field({ description: 'Основной текст статьи.' })
+  @Field(() => String, { description: 'Основной текст статьи.' })
   @IsString()
   @IsNotEmpty()
   content!: string;
@@ -55,23 +55,23 @@ export class UpdateArticleInput {
   @IsUUID()
   id!: string;
 
-  @Field({ nullable: true, description: 'Новый заголовок статьи.' })
+  @Field(() => String, { nullable: true, description: 'Новый заголовок статьи.' })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   title?: string;
 
-  @Field({ nullable: true, description: 'Новый slug статьи.' })
+  @Field(() => String, { nullable: true, description: 'Новый slug статьи.' })
   @IsOptional()
   @IsString()
   slug?: string;
 
-  @Field({ nullable: true, description: 'Новый анонс статьи.' })
+  @Field(() => String, { nullable: true, description: 'Новый анонс статьи.' })
   @IsOptional()
   @IsString()
   summary?: string;
 
-  @Field({ nullable: true, description: 'Новый текст статьи.' })
+  @Field(() => String, { nullable: true, description: 'Новый текст статьи.' })
   @IsOptional()
   @IsString()
   @IsNotEmpty()

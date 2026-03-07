@@ -3,17 +3,17 @@ import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 @InputType({ description: 'Данные для создания темы.' })
 export class CreateTopicInput {
-  @Field({ description: 'Название темы.' })
+  @Field(() => String, { description: 'Название темы.' })
   @IsString()
   @IsNotEmpty()
   title!: string;
 
-  @Field({ nullable: true, description: 'Человекочитаемый slug темы.' })
+  @Field(() => String, { nullable: true, description: 'Человекочитаемый slug темы.' })
   @IsOptional()
   @IsString()
   slug?: string;
 
-  @Field({ nullable: true, description: 'Краткое описание темы.' })
+  @Field(() => String, { nullable: true, description: 'Краткое описание темы.' })
   @IsOptional()
   @IsString()
   description?: string;
@@ -25,18 +25,18 @@ export class UpdateTopicInput {
   @IsUUID()
   id!: string;
 
-  @Field({ nullable: true, description: 'Новое название темы.' })
+  @Field(() => String, { nullable: true, description: 'Новое название темы.' })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   title?: string;
 
-  @Field({ nullable: true, description: 'Новый slug темы.' })
+  @Field(() => String, { nullable: true, description: 'Новый slug темы.' })
   @IsOptional()
   @IsString()
   slug?: string;
 
-  @Field({ nullable: true, description: 'Новое описание темы.' })
+  @Field(() => String, { nullable: true, description: 'Новое описание темы.' })
   @IsOptional()
   @IsString()
   description?: string;

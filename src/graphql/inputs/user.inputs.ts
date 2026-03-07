@@ -4,11 +4,11 @@ import { UserRole } from '../enums/graphql.enums';
 
 @InputType({ description: 'Данные для создания пользователя.' })
 export class CreateUserInput {
-  @Field({ description: 'Электронная почта пользователя.' })
+  @Field(() => String, { description: 'Электронная почта пользователя.' })
   @IsEmail()
   email!: string;
 
-  @Field({ description: 'Отображаемое имя пользователя.' })
+  @Field(() => String, { description: 'Отображаемое имя пользователя.' })
   @IsString()
   @IsNotEmpty()
   name!: string;
@@ -28,12 +28,12 @@ export class UpdateUserInput {
   @IsUUID()
   id!: string;
 
-  @Field({ nullable: true, description: 'Новый email пользователя.' })
+  @Field(() => String, { nullable: true, description: 'Новый email пользователя.' })
   @IsOptional()
   @IsEmail()
   email?: string;
 
-  @Field({ nullable: true, description: 'Новое имя пользователя.' })
+  @Field(() => String, { nullable: true, description: 'Новое имя пользователя.' })
   @IsOptional()
   @IsString()
   @IsNotEmpty()

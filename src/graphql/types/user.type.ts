@@ -8,10 +8,10 @@ export class User {
   @Field(() => ID, { description: 'Уникальный идентификатор пользователя.' })
   id!: string;
 
-  @Field({ description: 'Электронная почта пользователя.' })
+  @Field(() => String, { description: 'Электронная почта пользователя.' })
   email!: string;
 
-  @Field({ description: 'Имя пользователя.' })
+  @Field(() => String, { description: 'Имя пользователя.' })
   name!: string;
 
   @Field(() => UserRole, { description: 'Роль пользователя в системе.' })

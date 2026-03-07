@@ -9,16 +9,16 @@ export class Article {
   @Field(() => ID, { description: 'Уникальный идентификатор статьи.' })
   id!: string;
 
-  @Field({ description: 'Заголовок статьи.' })
+  @Field(() => String, { description: 'Заголовок статьи.' })
   title!: string;
 
-  @Field({ description: 'Человекочитаемый slug статьи.' })
+  @Field(() => String, { description: 'Человекочитаемый slug статьи.' })
   slug!: string;
 
-  @Field({ nullable: true, description: 'Краткий анонс статьи.' })
+  @Field(() => String, { nullable: true, description: 'Краткий анонс статьи.' })
   summary!: string | null;
 
-  @Field({ description: 'Основной текст статьи.' })
+  @Field(() => String, { description: 'Основной текст статьи.' })
   content!: string;
 
   @Field(() => ArticleStatus, { description: 'Текущий статус статьи.' })
