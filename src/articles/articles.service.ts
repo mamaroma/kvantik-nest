@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -12,7 +12,7 @@ export type ArticleEvent = {
     type: ArticleEventType;
     articleId: string;
     title: string;
-    at: string; // ISO
+    at: string;
 };
 
 @Injectable()
@@ -22,18 +22,96 @@ export class ArticlesService {
     private readonly eventsSubject = new Subject<ArticleEvent>();
     readonly events$ = this.eventsSubject.asObservable();
 
+    private readonly articleInclude = {
+        author: true,
+        topic: true,
+    } satisfies Prisma.ArticleInclude;
+
     async findAll() {
         return this.prisma.article.findMany({
-            include: { author: true, topic: true },
+            include: this.articleInclude,
             orderBy: { createdAt: 'desc' },
         });
     }
 
-    async findOne(id: string) {
-        return this.prisma.article.findUnique({
-            where: { id },
-            include: { author: true, topic: true },
+    async findManyPaginated(skip: number, take: number) {
+        return this.prisma.article.findMany({
+            include: this.articleInclude,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take,
         });
+    }
+
+    async count() {
+        return this.prisma.article.count();
+    }
+
+    async findOne(id: string) {
+        const article = await this.prisma.article.findUnique({
+            where: { id },
+            include: this.articleInclude,
+        });
+
+        if (!article) {
+            throw new NotFoundException('Статья не найдена');
+        }
+
+        return article;
+    }
+
+    async findByTopicPaginated(topicId: string, skip: number, take: number) {
+        return this.prisma.article.findMany({
+            where: { topicId },
+            include: this.articleInclude,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take,
+        });
+    }
+
+    async countByTopic(topicId: string) {
+        return this.prisma.article.count({ where: { topicId } });
+    }
+
+    async findOneByTopic(topicId: string, articleId: string) {
+        const article = await this.prisma.article.findFirst({
+            where: { id: articleId, topicId },
+            include: this.articleInclude,
+        });
+
+        if (!article) {
+            throw new NotFoundException('Статья в указанной теме не найдена');
+        }
+
+        return article;
+    }
+
+    async findByAuthorPaginated(authorId: string, skip: number, take: number) {
+        return this.prisma.article.findMany({
+            where: { authorId },
+            include: this.articleInclude,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take,
+        });
+    }
+
+    async countByAuthor(authorId: string) {
+        return this.prisma.article.count({ where: { authorId } });
+    }
+
+    async findOneByAuthor(authorId: string, articleId: string) {
+        const article = await this.prisma.article.findFirst({
+            where: { id: articleId, authorId },
+            include: this.articleInclude,
+        });
+
+        if (!article) {
+            throw new NotFoundException('Статья указанного автора не найдена');
+        }
+
+        return article;
     }
 
     private async makeUniqueSlug(baseRaw: string, excludeId?: string) {
@@ -41,7 +119,6 @@ export class ArticlesService {
         let candidate = base;
         let i = 2;
 
-        // Чтобы не было бесконечного цикла при совсем странных данных
         if (!candidate) candidate = 'article';
 
         while (true) {
@@ -59,10 +136,8 @@ export class ArticlesService {
     async create(dto: CreateArticleDto) {
         const baseSlug = (dto.slug?.trim() || slugify(dto.title)).trim();
         let slug = await this.makeUniqueSlug(baseSlug);
-
         const publishedAt = dto.publishedAt ? new Date(dto.publishedAt) : null;
 
-        // На случай гонки (две записи одновременно с одинаковым slug)
         for (let attempt = 0; attempt < 5; attempt++) {
             try {
                 const created = await this.prisma.article.create({
@@ -76,6 +151,7 @@ export class ArticlesService {
                         authorId: dto.authorId,
                         topicId: dto.topicId,
                     },
+                    include: this.articleInclude,
                 });
 
                 this.eventsSubject.next({
@@ -95,7 +171,6 @@ export class ArticlesService {
             }
         }
 
-        // Если уж совсем не повезло
         throw new Error('Не удалось создать статью: не удалось подобрать уникальный slug');
     }
 
@@ -104,23 +179,22 @@ export class ArticlesService {
             where: { id },
             select: { id: true, title: true, slug: true },
         });
-        if (!existing) return null;
+
+        if (!existing) {
+            throw new NotFoundException('Статья не найдена');
+        }
 
         const publishedAt = dto.publishedAt ? new Date(dto.publishedAt) : undefined;
-
-        // slug меняем только если он пришёл ИЛИ если пришёл title и slug не прислан (тогда пересоберём slug из title)
         let slug: string | undefined = undefined;
 
         if (typeof dto.slug === 'string') {
             const base = dto.slug.trim() || slugify(dto.title ?? existing.title);
             slug = await this.makeUniqueSlug(base, id);
         } else if (typeof dto.title === 'string') {
-            // если редактируют title и не задали slug вручную — обновим slug из title
             const base = slugify(dto.title);
             slug = await this.makeUniqueSlug(base, id);
         }
 
-        // На случай гонки при update тоже
         for (let attempt = 0; attempt < 5; attempt++) {
             try {
                 const updated = await this.prisma.article.update({
@@ -135,6 +209,7 @@ export class ArticlesService {
                         authorId: dto.authorId,
                         topicId: dto.topicId,
                     },
+                    include: this.articleInclude,
                 });
 
                 this.eventsSubject.next({
@@ -147,7 +222,6 @@ export class ArticlesService {
                 return updated;
             } catch (e) {
                 if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-                    // если конфликт — пересоберём slug ещё раз с суффиксом
                     const base = (dto.slug?.trim() || (dto.title ? slugify(dto.title) : existing.slug)).trim();
                     slug = await this.makeUniqueSlug(base, id);
                     continue;
@@ -160,12 +234,12 @@ export class ArticlesService {
     }
 
     async remove(id: string) {
-        const existing = await this.prisma.article.findUnique({ where: { id } });
+        const existing = await this.findOne(id);
         const removed = await this.prisma.article.delete({ where: { id } });
         this.eventsSubject.next({
             type: 'deleted',
             articleId: removed.id,
-            title: existing?.title ?? removed.title,
+            title: existing.title,
             at: new Date().toISOString(),
         });
         return removed;

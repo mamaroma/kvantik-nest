@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <%- include('partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('partials/header', { activePage, session }) %>
+
+  <main class="section-pad">
+    <h2><%= statusCode %> — <%= error %></h2>
+    <p><%= Array.isArray(message) ? message.join(', ') : message %></p>
+    <p class="muted"><code><%= path %></code></p>
+    <div class="kv-actions">
+      <a class="btn" href="javascript:history.back()">Назад</a>
+      <a class="btn btn--ghost" href="/">На главную</a>
+    </div>
+  </main>
+
+  <%- include('partials/footer', { session }) %>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
@@ -12,8 +12,24 @@ export class TopicsService {
         return this.prisma.topic.findMany({ orderBy: { title: 'asc' } });
     }
 
+    async findManyPaginated(skip: number, take: number) {
+        return this.prisma.topic.findMany({
+            orderBy: { title: 'asc' },
+            skip,
+            take,
+        });
+    }
+
+    async count() {
+        return this.prisma.topic.count();
+    }
+
     async findOne(id: string) {
-        return this.prisma.topic.findUnique({ where: { id } });
+        const topic = await this.prisma.topic.findUnique({ where: { id } });
+        if (!topic) {
+            throw new NotFoundException('Тема не найдена');
+        }
+        return topic;
     }
 
     async create(dto: CreateTopicDto) {
@@ -28,6 +44,7 @@ export class TopicsService {
     }
 
     async update(id: string, dto: UpdateTopicDto) {
+        await this.findOne(id);
         const slug = dto.slug ? dto.slug.trim() : undefined;
         return this.prisma.topic.update({
             where: { id },
@@ -40,6 +57,7 @@ export class TopicsService {
     }
 
     async remove(id: string) {
+        await this.findOne(id);
         return this.prisma.topic.delete({ where: { id } });
     }
 
