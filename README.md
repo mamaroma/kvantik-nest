@@ -1,102 +1,162 @@
 # Квантик — NestJS + Render
 
-# Kvantik Nest (LR1)
-
 Автор: Арсений Краковский, группа м3306
 
-NestJS-приложение с деплоем на Render, подключением MVC (EJS) и отдачей статических файлов из public.
-Реализованы шаблоны и partials (header/menu/footer/session) + страницы index/articles.
+NestJS-приложение для научно-популярного журнала «Квантик» с MVC (EJS), REST API, GraphQL, Prisma и SSE.
 
-Демо: https://kvantik-nest.onrender.com
+## Что реализовано в ЛР6
 
-## Описание
+### 1) Измерение времени запроса
 
-Сайт научно‑популярного онлайн‑журнала «Квантик». Проект развёрнут на Render и использует MVC‑шаблонизацию (EJS) для повторяющихся блоков страниц.
+Добавлен глобальный `RequestTimingInterceptor`.
 
-## Ссылка на развёрнутое приложение
+- Для MVC-страниц серверное время пробрасывается в шаблоны и выводится рядом с клиентским временем в подвале.
+- Для REST API и GraphQL время возвращается в заголовке `X-Elapsed-Time`.
+- Одновременно время пишется в логи приложения.
 
-- Render: <PASTE_YOUR_RENDER_URL_HERE>
+### 2) Кэширование
+
+#### Клиентское кэширование REST API
+
+Для GET-эндпоинтов REST API настроены:
+
+- `Cache-Control: public, max-age=60, must-revalidate`
+- `ETag` через отдельный глобальный `EtagInterceptor`
+
+Это даёт возможность:
+
+- в течение минуты использовать локальный кэш браузера;
+- после истечения `max-age` выполнять условный запрос с `If-None-Match`;
+- получать `304 Not Modified`, если ресурс не изменился.
+
+#### Серверное кэширование
+
+Через `CacheModule` настроен in-memory cache для сущности `Topic`.
+
+- TTL: `5000` мс
+- кэшируются `findAll`, `findManyPaginated`, `count`, `findOne`
+- при создании/изменении/удалении темы кэш очищается
+
+### 3) Загрузка файлов в S3-совместимое хранилище
+
+Добавлен инфраструктурный модуль `StorageModule` на базе AWS SDK v3.
+
+Реализовано:
+
+- загрузка изображения статьи в Yandex Object Storage;
+- REST endpoint: `POST /api/articles/:id/media`;
+- MVC-форма на странице статьи: `POST /articles/:id/media`;
+- валидация файла по типу и размеру (до 5 МБ);
+- сохранение ссылки в `MediaAsset`.
+
+## Переменные окружения
+
+Используй `.env.example` как шаблон.
+
+Для Object Storage нужны:
+
+```env
+S3_ENDPOINT=https://storage.yandexcloud.net
+S3_REGION=ru-central1
+S3_BUCKET=your-bucket-name
+S3_ACCESS_KEY_ID=your-access-key
+S3_SECRET_ACCESS_KEY=your-secret-key
+S3_PUBLIC_BASE_URL=https://your-bucket-name.storage.yandexcloud.net
+```
+
+Если бакет публичный, `S3_PUBLIC_BASE_URL` удобно указывать как публичный адрес бакета.
 
 ## Запуск локально
 
 ```bash
 npm install
+npm run prisma:generate
 npm run start:dev
 ```
 
 Открыть: http://localhost:3000
 
-## Проверка PORT
+## Проверка ЛР6
 
-Можно запустить на другом порту:
+### Проверка времени ответа
 
-```bash
-PORT=4000 npm run start:dev
-```
+- MVC: открой `/mvc` или `/articles` и посмотри подвал страницы.
+- REST API: смотри заголовок `X-Elapsed-Time`, например у `/api/articles`.
+- GraphQL: выполни запрос на `/graphql` и проверь `X-Elapsed-Time` в HTTP response headers.
 
----
+### Проверка ETag
 
-# ЛР2 — доменная модель + PostgreSQL
-
-## ORM (Prisma)
-
-Схема находится в `prisma/schema.prisma`.
-
-Команды:
+Пример:
 
 ```bash
-npm install
-npm run prisma:generate
-npm run prisma:migrate
+curl -i http://localhost:3000/api/topics
+curl -i http://localhost:3000/api/topics -H 'If-None-Match: W/"...etag..."'
 ```
 
-Для Render (production)  миграции:
+Во втором случае должен прийти `304 Not Modified`, если данные не менялись.
+
+### Проверка server cache
+
+Можно несколько раз подряд дернуть:
 
 ```bash
-npm run prisma:migrate:deploy
+hey -n 20 -c 5 http://localhost:3000/api/topics
 ```
 
-Проверка подключения (на запущенном сервере):
+или просто:
 
-- `GET /db/ping`
+```bash
+curl http://localhost:3000/api/topics
+```
 
-## ER-диаграмма
+### Проверка загрузки файла
 
-![ER Diagram](./_prisma_migrations.png)
+1. Создай статью.
+2. Открой страницу статьи.
+3. Загрузи изображение через форму.
+4. Убедись, что картинка появилась в блоке `Медиафайлы`.
 
+## Старые части проекта
 
-## ЛР3: MVC + DDD-модули + SSE
+### ЛР2
 
-Структура
-•	Поддомены вынесены в отдельные модули (DDD-подход): articles/, topics/, users/
-•	Бизнес-логика находится в *.service.ts, контроллеры отвечают за маршрутизацию и рендер шаблонов
-•	Шаблоны: views/*, общая разметка через layout/partials
+- Prisma schema: `prisma/schema.prisma`
+- Проверка БД: `GET /db/ping`
 
-Маршруты (CRUD)
+### ЛР3
+
+#### CRUD маршруты MVC
 
 Articles
-•	GET /articles — список
-•	GET /articles/:id — просмотр
-•	GET /articles/add — форма создания
-•	POST /articles — создание
-•	GET /articles/:id/edit — форма редактирования
-•	PATCH /articles/:id — обновление
-•	DELETE /articles/:id — удаление
+
+- `GET /articles`
+- `GET /articles/:id`
+- `GET /articles/add`
+- `POST /articles`
+- `GET /articles/:id/edit`
+- `PATCH /articles/:id`
+- `DELETE /articles/:id`
 
 Topics
-•	GET /topics, GET /topics/:id, GET /topics/add, POST /topics, GET /topics/:id/edit, PATCH /topics/:id, DELETE /topics/:id
+
+- `GET /topics`
+- `GET /topics/:id`
+- `GET /topics/add`
+- `POST /topics`
+- `GET /topics/:id/edit`
+- `PATCH /topics/:id`
+- `DELETE /topics/:id`
 
 Users
-•	GET /users, GET /users/:id, GET /users/add, POST /users, GET /users/:id/edit, PATCH /users/:id, DELETE /users/:id
 
-Для отправки PATCH/DELETE из HTML-форм используется ?_method=PATCH / ?_method=DELETE.
+- `GET /users`
+- `GET /users/:id`
+- `GET /users/add`
+- `POST /users`
+- `GET /users/:id/edit`
+- `PATCH /users/:id`
+- `DELETE /users/:id`
 
-SSE (обновления в реальном времени)
-•	GET /articles/sse — Server-Sent Events поток
-•	На странице /articles подключён EventSource, изменения (create/update/delete) показываются toast-уведомлениями без перезагрузки страницы.
+#### SSE
 
-Запуск
-```bash
-npm i
-npm run start:dev
-```
+- `GET /articles/sse`

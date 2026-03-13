@@ -20,4 +20,10 @@
       <li><a href="/topics<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>">Темы</a></li>
     </ul>
   </nav>
+
+  <p
+    id="serverPerfInfo"
+    class="perf-info js-only"
+    data-server-elapsed-ms="<%= typeof serverElapsedTimeMs !== 'undefined' ? serverElapsedTimeMs : '' %>">
+  </p>
 </footer>

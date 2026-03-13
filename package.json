@@ -47,7 +47,10 @@
     "@apollo/server": "^5.4.0",
     "@as-integrations/express5": "^1.1.2",
     "graphql": "^16.11.0",
-    "graphql-query-complexity": "^1.1.0"
+    "graphql-query-complexity": "^1.1.0",
+    "@aws-sdk/client-s3": "^3.883.0",
+    "@nestjs/cache-manager": "^3.0.1",
+    "cache-manager": "^7.1.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
@@ -71,6 +74,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.6.3",
-    "prisma": "^6.3.1"
+    "prisma": "^6.3.1",
+    "@types/multer": "^2.0.0"
   }
 }

@@ -3,19 +3,26 @@ import {
     Controller,
     Delete,
     Get,
+    Header,
     HttpCode,
     HttpStatus,
     Param,
+    ParseFilePipeBuilder,
     ParseUUIDPipe,
     Patch,
     Post,
     Query,
     Req,
     Res,
+    UploadedFile,
+    UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
     ApiBadRequestResponse,
+    ApiBody,
     ApiConflictResponse,
+    ApiConsumes,
     ApiCreatedResponse,
     ApiNoContentResponse,
     ApiNotFoundResponse,
@@ -23,20 +30,23 @@ import {
     ApiOperation,
     ApiQuery,
     ApiTags,
+    ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import { Express, Request, Response } from 'express';
+import { memoryStorage } from 'multer';
 import { ErrorResponseDto } from '../../common/dto/error-response.dto';
 import { buildPaginationMeta } from '../../common/pagination/pagination-meta.dto';
 import { setPaginationLinks } from '../../common/pagination/pagination-links';
 import { PaginationQueryDto, paginationToPrisma } from '../../common/pagination/pagination-query.dto';
 import { TopicsService } from '../../topics/topics.service';
 import { UsersService } from '../../users/users.service';
-import { ArticleResponseDto, PaginatedArticlesResponseDto } from '../dto/article-response.dto';
+import { ArticleMediaDto, ArticleResponseDto, PaginatedArticlesResponseDto } from '../dto/article-response.dto';
 import { TopicResponseDto } from '../../topics/dto/topic-response.dto';
 import { UserResponseDto } from '../../users/dto/user-response.dto';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { UpdateArticleDto } from '../dto/update-article.dto';
 import { ArticlesService } from '../articles.service';
+import { UploadArticleMediaDto } from '../dto/upload-article-media.dto';
 
 @ApiTags('articles')
 @Controller('api/articles')
@@ -48,6 +58,7 @@ export class ArticlesApiController {
     ) {}
 
     @Get()
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить список статей' })
     @ApiQuery({ name: 'page', required: false, example: 1 })
     @ApiQuery({ name: 'limit', required: false, example: 10 })
@@ -82,12 +93,41 @@ export class ArticlesApiController {
     }
 
     @Get(':id')
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить статью по id' })
     @ApiOkResponse({ type: ArticleResponseDto })
     @ApiBadRequestResponse({ type: ErrorResponseDto })
     @ApiNotFoundResponse({ type: ErrorResponseDto })
     async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
         return this.articlesService.findOne(id);
+    }
+
+    @Post(':id/media')
+    @UseInterceptors(
+        FileInterceptor('file', {
+            storage: memoryStorage(),
+            limits: { fileSize: 5 * 1024 * 1024 },
+        }),
+    )
+    @ApiOperation({ summary: 'Загрузить изображение статьи в S3-совместимое хранилище' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({ type: UploadArticleMediaDto })
+    @ApiCreatedResponse({ type: ArticleMediaDto })
+    @ApiBadRequestResponse({ type: ErrorResponseDto })
+    @ApiNotFoundResponse({ type: ErrorResponseDto })
+    @ApiUnprocessableEntityResponse({ type: ErrorResponseDto })
+    async uploadMedia(
+        @Param('id', new ParseUUIDPipe()) id: string,
+        @UploadedFile(
+            new ParseFilePipeBuilder()
+                .addFileTypeValidator({ fileType: /(jpg|jpeg|png|webp|gif)$/i })
+                .addMaxSizeValidator({ maxSize: 5 * 1024 * 1024 })
+                .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
+        )
+        file: Express.Multer.File,
+        @Body('caption') caption?: string,
+    ) {
+        return this.articlesService.uploadMedia(id, file, caption);
     }
 
     @Patch(':id')
@@ -111,6 +151,7 @@ export class ArticlesApiController {
     }
 
     @Get(':id/author')
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить автора статьи' })
     @ApiOkResponse({ type: UserResponseDto })
     @ApiBadRequestResponse({ type: ErrorResponseDto })
@@ -121,6 +162,7 @@ export class ArticlesApiController {
     }
 
     @Get(':id/topic')
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить тему статьи' })
     @ApiOkResponse({ type: TopicResponseDto })
     @ApiBadRequestResponse({ type: ErrorResponseDto })

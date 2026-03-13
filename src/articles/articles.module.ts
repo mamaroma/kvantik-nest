@@ -4,9 +4,10 @@ import { ArticlesController } from './articles.controller';
 import { TopicsModule } from '../topics/topics.module';
 import { UsersModule } from '../users/users.module';
 import { ArticlesApiController } from './api/articles-api.controller';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
-    imports: [forwardRef(() => TopicsModule), forwardRef(() => UsersModule)],
+    imports: [StorageModule, forwardRef(() => TopicsModule), forwardRef(() => UsersModule)],
     controllers: [ArticlesController, ArticlesApiController],
     providers: [ArticlesService],
     exports: [ArticlesService],

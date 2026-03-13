@@ -3,16 +3,22 @@ import {
     Controller,
     Delete,
     Get,
+    HttpStatus,
     MessageEvent,
     Param,
+    ParseFilePipeBuilder,
     Patch,
     Post,
     Query,
     Render,
     Res,
     Sse,
+    UploadedFile,
+    UseInterceptors,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express, Response } from 'express';
+import { memoryStorage } from 'multer';
 import { map, Observable } from 'rxjs';
 import { sessionFromQuery } from '../common/session';
 import { ArticlesService } from './articles.service';
@@ -29,10 +35,6 @@ export class ArticlesController {
         private readonly topicsService: TopicsService,
         private readonly usersService: UsersService,
     ) {}
-
-    private buildSuffix(query: { auth?: string; user?: string }) {
-        return query?.auth ? `?auth=1&user=${encodeURIComponent(query.user ?? '')}` : '';
-    }
 
     private buildQueryParams(query: { auth?: string; user?: string }) {
         const q = new URLSearchParams();
@@ -103,7 +105,6 @@ export class ArticlesController {
             const q = this.buildQueryParams(query);
             return res.redirect(`/articles/${created.id}${q.toString() ? `?${q.toString()}` : ''}`);
         } catch (e) {
-            // если где-то всё же вылез уникальный конфликт (или ты уберёшь автосуффикс и захочешь ручной контроль)
             if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
                 await this.topicsService.ensureDefaultTopics();
                 await this.usersService.ensureDefaultAuthor();
@@ -139,6 +140,31 @@ export class ArticlesController {
             session: sessionFromQuery(query),
             article,
         };
+    }
+
+    @Post(':id/media')
+    @UseInterceptors(
+        FileInterceptor('file', {
+            storage: memoryStorage(),
+            limits: { fileSize: 5 * 1024 * 1024 },
+        }),
+    )
+    async uploadMedia(
+        @Param('id') id: string,
+        @UploadedFile(
+            new ParseFilePipeBuilder()
+                .addFileTypeValidator({ fileType: /(jpg|jpeg|png|webp|gif)$/i })
+                .addMaxSizeValidator({ maxSize: 5 * 1024 * 1024 })
+                .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
+        )
+        file: Express.Multer.File,
+        @Body('caption') caption: string | undefined,
+        @Query() query: { auth?: string; user?: string },
+        @Res() res: Response,
+    ) {
+        await this.articlesService.uploadMedia(id, file, caption);
+        const q = this.buildQueryParams(query);
+        return res.redirect(`/articles/${id}${q.toString() ? `?${q.toString()}` : ''}`);
     }
 
     @Get(':id/edit')
@@ -194,7 +220,6 @@ export class ArticlesController {
                     topics,
                     authors: authors.filter((u) => u.role !== UserRole.READER),
                     error: 'Такой slug уже существует. Измени slug или оставь поле пустым.',
-                    // показываем то, что пользователь пытался сохранить
                     article: {
                         ...article,
                         ...dto,

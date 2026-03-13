@@ -35,6 +35,47 @@
         <p><%= article.summary %></p>
       <% } %>
 
+      <% if (Array.isArray(article.media) && article.media.length > 0) { %>
+        <section style="margin: 24px 0;">
+          <h3>Медиафайлы</h3>
+          <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+            <% article.media.forEach((asset) => { %>
+              <figure style="margin: 0; border: 1px solid #ddd; border-radius: 12px; overflow: hidden; background: #fff;">
+                <img
+                  src="<%= asset.url %>"
+                  alt="<%= asset.caption || article.title %>"
+                  style="display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover;"
+                />
+                <figcaption style="padding: 10px 12px;">
+                  <strong><%= asset.caption || 'Без подписи' %></strong><br />
+                  <a href="<%= asset.url %>" target="_blank" rel="noreferrer">Открыть оригинал</a>
+                </figcaption>
+              </figure>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+
+      <section style="margin: 24px 0; border: 1px solid #ddd; border-radius: 12px; padding: 16px; background: #fff;">
+        <h3>Загрузить изображение в Object Storage</h3>
+        <form method="POST" action="/articles/<%= article.id %>/media<%= suffix %>" enctype="multipart/form-data" class="kv-form">
+          <label>
+            Изображение
+            <input type="file" name="file" accept="image/png,image/jpeg,image/webp,image/gif" required />
+          </label>
+
+          <label>
+            Подпись (опционально)
+            <input type="text" name="caption" placeholder="Например, обложка статьи" />
+          </label>
+
+          <div class="kv-actions">
+            <button class="btn" type="submit">Загрузить файл</button>
+          </div>
+        </form>
+        <p class="muted">Файл пройдёт валидацию по типу и размеру (до 5 МБ), затем будет загружен в S3-совместимое хранилище.</p>
+      </section>
+
       <hr />
       <pre class="article-content"><%= article.content %></pre>
 

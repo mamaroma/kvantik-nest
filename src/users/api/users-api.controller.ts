@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     Get,
+    Header,
     HttpCode,
     HttpStatus,
     Param,
@@ -45,6 +46,7 @@ export class UsersApiController {
     ) {}
 
     @Get()
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить список пользователей' })
     @ApiQuery({ name: 'page', required: false, example: 1 })
     @ApiQuery({ name: 'limit', required: false, example: 10 })
@@ -79,6 +81,7 @@ export class UsersApiController {
     }
 
     @Get(':id')
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить пользователя по id' })
     @ApiOkResponse({ type: UserResponseDto })
     @ApiBadRequestResponse({ type: ErrorResponseDto })
@@ -108,6 +111,7 @@ export class UsersApiController {
     }
 
     @Get(':id/articles')
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить все статьи автора' })
     @ApiQuery({ name: 'page', required: false, example: 1 })
     @ApiQuery({ name: 'limit', required: false, example: 10 })
@@ -137,6 +141,7 @@ export class UsersApiController {
     }
 
     @Get(':id/articles/:articleId')
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить конкретную статью автора' })
     @ApiOkResponse({ type: ArticleResponseDto })
     @ApiBadRequestResponse({ type: ErrorResponseDto })

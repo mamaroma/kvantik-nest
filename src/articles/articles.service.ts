@@ -1,3 +1,4 @@
+import { Express } from 'express';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -5,6 +6,7 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleStatus, Prisma } from '@prisma/client';
 import { Subject } from 'rxjs';
 import { slugify } from '../common/slug';
+import { StorageService } from '../storage/storage.service';
 
 export type ArticleEventType = 'created' | 'updated' | 'deleted';
 
@@ -17,7 +19,10 @@ export type ArticleEvent = {
 
 @Injectable()
 export class ArticlesService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly storageService: StorageService,
+    ) {}
 
     private readonly eventsSubject = new Subject<ArticleEvent>();
     readonly events$ = this.eventsSubject.asObservable();
@@ -25,6 +30,9 @@ export class ArticlesService {
     private readonly articleInclude = {
         author: true,
         topic: true,
+        media: {
+            orderBy: { createdAt: 'desc' },
+        },
     } satisfies Prisma.ArticleInclude;
 
     async findAll() {
@@ -114,6 +122,19 @@ export class ArticlesService {
         return article;
     }
 
+    async uploadMedia(articleId: string, file: Express.Multer.File, caption?: string) {
+        await this.findOne(articleId);
+
+        const uploaded = await this.storageService.uploadPublicFile(file, `articles/${articleId}`);
+        return this.prisma.mediaAsset.create({
+            data: {
+                articleId,
+                url: uploaded.url,
+                caption: caption?.trim() || null,
+            },
+        });
+    }
+
     private async makeUniqueSlug(baseRaw: string, excludeId?: string) {
         const base = baseRaw.trim();
         let candidate = base;
@@ -185,7 +206,7 @@ export class ArticlesService {
         }
 
         const publishedAt = dto.publishedAt ? new Date(dto.publishedAt) : undefined;
-        let slug: string | undefined = undefined;
+        let slug: string | undefined;
 
         if (typeof dto.slug === 'string') {
             const base = dto.slug.trim() || slugify(dto.title ?? existing.title);

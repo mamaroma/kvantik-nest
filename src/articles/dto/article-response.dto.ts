@@ -33,6 +33,20 @@ export class ArticleTopicDto {
     description!: string | null;
 }
 
+export class ArticleMediaDto {
+    @ApiProperty({ format: 'uuid' })
+    id!: string;
+
+    @ApiProperty({ example: 'https://storage.yandexcloud.net/bucket/articles/demo.jpg' })
+    url!: string;
+
+    @ApiPropertyOptional({ example: 'Обложка статьи' })
+    caption!: string | null;
+
+    @ApiProperty({ example: '2026-03-07T10:00:00.000Z' })
+    createdAt!: Date;
+}
+
 export class ArticleResponseDto {
     @ApiProperty({ format: 'uuid' })
     id!: string;
@@ -66,6 +80,9 @@ export class ArticleResponseDto {
 
     @ApiProperty({ type: () => ArticleTopicDto })
     topic!: ArticleTopicDto;
+
+    @ApiProperty({ type: () => [ArticleMediaDto] })
+    media!: ArticleMediaDto[];
 }
 
 export class PaginatedArticlesResponseDto {

@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     Get,
+    Header,
     HttpCode,
     HttpStatus,
     Param,
@@ -45,6 +46,7 @@ export class TopicsApiController {
     ) {}
 
     @Get()
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить список тем' })
     @ApiQuery({ name: 'page', required: false, example: 1 })
     @ApiQuery({ name: 'limit', required: false, example: 10 })
@@ -79,6 +81,7 @@ export class TopicsApiController {
     }
 
     @Get(':id')
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить тему по id' })
     @ApiOkResponse({ type: TopicResponseDto })
     @ApiBadRequestResponse({ type: ErrorResponseDto })
@@ -108,6 +111,7 @@ export class TopicsApiController {
     }
 
     @Get(':id/articles')
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить все статьи темы' })
     @ApiQuery({ name: 'page', required: false, example: 1 })
     @ApiQuery({ name: 'limit', required: false, example: 10 })
@@ -137,6 +141,7 @@ export class TopicsApiController {
     }
 
     @Get(':id/articles/:articleId')
+    @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить конкретную статью темы' })
     @ApiOkResponse({ type: ArticleResponseDto })
     @ApiBadRequestResponse({ type: ErrorResponseDto })
