@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <%- include('../partials/head', { pageTitle }) %>
+</head>
+<body>
+  <%- include('../partials/header', { activePage, session }) %>
+  <main class="section-pad">
+    <h2>Вход</h2>
+    <% if (error) { %><p class="error"><%= error %></p><% } %>
+    <p class="muted">Тестовые пользователи: admin@kvantik.local / admin123, author@kvantik.local / author123, reader@kvantik.local / reader123.</p>
+    <form class="kv-form" method="POST" action="/auth/login?returnTo=<%= encodeURIComponent(returnTo) %>">
+      <label>Email<input type="email" name="email" required /></label>
+      <label>Пароль<input type="password" name="password" required minlength="6" /></label>
+      <div class="kv-actions">
+        <button class="btn" type="submit">Войти</button>
+        <a class="btn btn--ghost" href="/auth/register?returnTo=<%= encodeURIComponent(returnTo) %>">Создать аккаунт</a>
+      </div>
+    </form>
+  </main>
+  <%- include('../partials/footer', { session }) %>
+</body>
+</html>

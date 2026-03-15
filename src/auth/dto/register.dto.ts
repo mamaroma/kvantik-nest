@@ -3,7 +3,7 @@ import { UserRole } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
-export class CreateUserDto {
+export class RegisterDto {
     @ApiProperty({ example: 'reader@kvantik.local' })
     @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
     @IsEmail()

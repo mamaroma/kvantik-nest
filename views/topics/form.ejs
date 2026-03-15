@@ -6,11 +6,10 @@
 <body>
   <%- include('../partials/header', { activePage, session }) %>
 
-  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
   <% const isEdit = mode === 'edit'; %>
   <% const actionUrl = isEdit
-    ? (`/topics/${topic.id}?_method=PATCH${suffix ? '&' + suffix.slice(1) : ''}`)
-    : (`/topics${suffix}`);
+    ? (`/topics/${topic.id}?_method=PATCH`)
+    : ('/topics');
   %>
 
   <main class="section-pad">
@@ -34,7 +33,7 @@
 
       <div class="kv-actions">
         <button class="btn" type="submit"><%= isEdit ? 'Сохранить' : 'Создать' %></button>
-        <a class="btn btn--ghost" href="/topics<%= suffix %>">Отмена</a>
+        <a class="btn btn--ghost" href="/topics">Отмена</a>
       </div>
     </form>
   </main>

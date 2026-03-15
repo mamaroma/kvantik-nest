@@ -6,21 +6,23 @@
 <body>
   <%- include('../partials/header', { activePage, session }) %>
 
-  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
-
   <main class="section-pad">
     <% if (!article) { %>
       <h2>Статья не найдена</h2>
-      <a class="btn" href="/articles<%= suffix %>">К списку</a>
+      <a class="btn" href="/articles">К списку</a>
     <% } else { %>
       <div class="kv-actions">
         <h2><%= article.title %></h2>
-        <div class="kv-actions">
-          <a class="btn btn--ghost" href="/articles/<%= article.id %>/edit<%= suffix %>">Редактировать</a>
-          <form method="POST" action="/articles/<%= article.id %>?_method=DELETE<%= suffix ? '&' + suffix.slice(1) : '' %>" onsubmit="return confirm('Удалить статью?');">
-            <button class="btn btn--danger" type="submit">Удалить</button>
-          </form>
-        </div>
+        <% if (session?.isAuthed && (session.role === 'AUTHOR' || session.role === 'ADMIN')) { %>
+          <div class="kv-actions">
+            <a class="btn btn--ghost" href="/articles/<%= article.id %>/edit">Редактировать</a>
+            <% if (session.role === 'ADMIN') { %>
+              <form method="POST" action="/articles/<%= article.id %>?_method=DELETE" onsubmit="return confirm('Удалить статью?');">
+                <button class="btn btn--danger" type="submit">Удалить</button>
+              </form>
+            <% } %>
+          </div>
+        <% } %>
       </div>
 
       <p class="muted">
@@ -31,9 +33,7 @@
         <span><%= article.author?.name || '—' %></span>
       </p>
 
-      <% if (article.summary) { %>
-        <p><%= article.summary %></p>
-      <% } %>
+      <% if (article.summary) { %><p><%= article.summary %></p><% } %>
 
       <% if (Array.isArray(article.media) && article.media.length > 0) { %>
         <section style="margin: 24px 0;">
@@ -41,11 +41,7 @@
           <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
             <% article.media.forEach((asset) => { %>
               <figure style="margin: 0; border: 1px solid #ddd; border-radius: 12px; overflow: hidden; background: #fff;">
-                <img
-                  src="<%= asset.url %>"
-                  alt="<%= asset.caption || article.title %>"
-                  style="display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover;"
-                />
+                <img src="<%= asset.url %>" alt="<%= asset.caption || article.title %>" style="display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover;" />
                 <figcaption style="padding: 10px 12px;">
                   <strong><%= asset.caption || 'Без подписи' %></strong><br />
                   <a href="<%= asset.url %>" target="_blank" rel="noreferrer">Открыть оригинал</a>
@@ -56,32 +52,21 @@
         </section>
       <% } %>
 
+      <% if (session?.isAuthed && (session.role === 'AUTHOR' || session.role === 'ADMIN')) { %>
       <section style="margin: 24px 0; border: 1px solid #ddd; border-radius: 12px; padding: 16px; background: #fff;">
         <h3>Загрузить изображение в Object Storage</h3>
-        <form method="POST" action="/articles/<%= article.id %>/media<%= suffix %>" enctype="multipart/form-data" class="kv-form">
-          <label>
-            Изображение
-            <input type="file" name="file" accept="image/png,image/jpeg,image/webp,image/gif" required />
-          </label>
-
-          <label>
-            Подпись (опционально)
-            <input type="text" name="caption" placeholder="Например, обложка статьи" />
-          </label>
-
-          <div class="kv-actions">
-            <button class="btn" type="submit">Загрузить файл</button>
-          </div>
+        <form method="POST" action="/articles/<%= article.id %>/media" enctype="multipart/form-data" class="kv-form">
+          <label>Изображение<input type="file" name="file" accept="image/png,image/jpeg,image/webp,image/gif" required /></label>
+          <label>Подпись (опционально)<input type="text" name="caption" placeholder="Например, обложка статьи" /></label>
+          <div class="kv-actions"><button class="btn" type="submit">Загрузить файл</button></div>
         </form>
         <p class="muted">Файл пройдёт валидацию по типу и размеру (до 5 МБ), затем будет загружен в S3-совместимое хранилище.</p>
       </section>
+      <% } %>
 
       <hr />
       <pre class="article-content"><%= article.content %></pre>
-
-      <div class="kv-actions">
-        <a class="btn" href="/articles<%= suffix %>">К списку</a>
-      </div>
+      <div class="kv-actions"><a class="btn" href="/articles">К списку</a></div>
     <% } %>
   </main>
 

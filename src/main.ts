@@ -10,6 +10,9 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+    const configService = app.get(ConfigService);
+
+
     app.enableShutdownHooks();
 
     app.useGlobalPipes(
@@ -32,17 +35,29 @@ async function bootstrap() {
     app.setBaseViewsDir(join(process.cwd(), 'views'));
     app.setViewEngine('ejs');
 
+    app.enableCors({
+        origin: (configService.get<string>('CORS_ORIGIN') || 'http://localhost:3000').split(','),
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        methods: ['GET', 'HEAD', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    });
+
     const swaggerConfig = new DocumentBuilder()
         .setTitle('Квантик REST API')
         .setDescription('RESTful API и OpenAPI-спецификация для журнала «Квантик».')
         .setVersion('1.0.0')
+        .addCookieAuth('kvantik_auth', {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'kvantik_auth',
+            description: 'JWT access token в HttpOnly cookie',
+        }, 'kvantik-auth')
         .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api/docs', app, document, {
         swaggerOptions: { persistAuthorization: true },
     });
 
-    const configService = app.get(ConfigService);
     const port = Number(configService.get('PORT') ?? 3000);
 
     await app.listen(port, '0.0.0.0');

@@ -16,8 +16,8 @@
   <nav aria-label="Навигация подвала">
     <ul>
       <li><a href="#top">Наверх</a></li>
-      <li><a href="/about<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>">О проекте</a></li>
-      <li><a href="/topics<%= session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : '' %>">Темы</a></li>
+      <li><a href="/about">О проекте</a></li>
+      <li><a href="/topics">Темы</a></li>
     </ul>
   </nav>
 

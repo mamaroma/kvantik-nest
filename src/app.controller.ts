@@ -1,28 +1,27 @@
-import { Controller, Get, Query, Render, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Render, Req, Res } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { PrismaService } from './prisma/prisma.service';
-import { sessionFromQuery } from './common/session';
+import { PublicAccess } from './auth/decorators/public-access.decorator';
+import { sessionFromRequest } from './common/session';
 
 @Controller()
 export class AppController {
     constructor(private readonly prisma: PrismaService) {}
 
+    @PublicAccess()
     @Get()
-    root(@Query() query: { auth?: string; user?: string }, @Res() res: Response) {
-        const q = new URLSearchParams();
-        if (query.auth) q.set('auth', query.auth);
-        if (query.user) q.set('user', query.user);
-        const suffix = q.toString() ? `?${q.toString()}` : '';
-        return res.redirect(`/html/about.html${suffix}`);
+    root(@Res() res: Response) {
+        return res.redirect('/mvc');
     }
 
+    @PublicAccess()
     @Get('mvc')
     @Render('index')
-    getIndex(@Query() query: { auth?: string; user?: string }) {
+    getIndex(@Req() req: Request) {
         return {
             pageTitle: 'Квантик — научно-популярный журнал',
             activePage: 'index',
-            session: sessionFromQuery(query),
+            session: sessionFromRequest(req),
             featured: [
                 {
                     title: 'Почему небо голубое?',
@@ -44,41 +43,49 @@ export class AppController {
         };
     }
 
+    @PublicAccess()
     @Get('gallery')
     gallery(@Res() res: Response) {
         return res.redirect('/html/gallery.html');
     }
 
+    @PublicAccess()
     @Get('news')
     news(@Res() res: Response) {
         return res.redirect('/html/news.html');
     }
 
+    @PublicAccess()
     @Get('table')
     table(@Res() res: Response) {
         return res.redirect('/html/table.html');
     }
 
+    @PublicAccess()
     @Get('code')
     code(@Res() res: Response) {
         return res.redirect('/html/code.html');
     }
 
+    @PublicAccess()
     @Get('builder')
     builder(@Res() res: Response) {
         return res.redirect('/html/builder.html');
     }
 
+    @PublicAccess()
     @Get('about')
     about(@Res() res: Response) {
         return res.redirect('/html/about.html');
     }
 
+    @PublicAccess()
     @Get('contacts')
     contacts(@Res() res: Response) {
         return res.redirect('/html/contacts.html');
     }
 
+    @PublicAccess()
     @Get('db/ping')
     async dbPing() {
         const rows = await this.prisma.$queryRaw<Array<{ now: Date }>>`SELECT NOW() as now`;

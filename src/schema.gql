@@ -110,6 +110,9 @@ input CreateUserInput {
   """Отображаемое имя пользователя."""
   name: String!
 
+  """Пароль пользователя."""
+  password: String!
+
   """Роль пользователя. По умолчанию создаётся читатель."""
   role: UserRole
 }
@@ -364,6 +367,9 @@ input UpdateUserInput {
 
   """Новое имя пользователя."""
   name: String
+
+  """Новый пароль пользователя."""
+  password: String
 
   """Новая роль пользователя."""
   role: UserRole

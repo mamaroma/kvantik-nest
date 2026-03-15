@@ -26,6 +26,10 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { UserRole } from '@prisma/client';
+import { ApiCookieAuth, ApiForbiddenResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { PublicAccess } from '../../auth/decorators/public-access.decorator';
+import { Roles } from '../../auth/decorators/roles.decorator';
 import { ArticleResponseDto, PaginatedArticlesResponseDto } from '../../articles/dto/article-response.dto';
 import { ArticlesService } from '../../articles/articles.service';
 import { ErrorResponseDto } from '../../common/dto/error-response.dto';
@@ -45,6 +49,7 @@ export class TopicsApiController {
         private readonly articlesService: ArticlesService,
     ) {}
 
+    @PublicAccess()
     @Get()
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить список тем' })
@@ -71,6 +76,10 @@ export class TopicsApiController {
         };
     }
 
+    @Roles(UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Post()
     @ApiOperation({ summary: 'Создать тему' })
     @ApiCreatedResponse({ type: TopicResponseDto })
@@ -80,6 +89,7 @@ export class TopicsApiController {
         return this.topicsService.create(dto);
     }
 
+    @PublicAccess()
     @Get(':id')
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить тему по id' })
@@ -90,6 +100,10 @@ export class TopicsApiController {
         return this.topicsService.findOne(id);
     }
 
+    @Roles(UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Patch(':id')
     @ApiOperation({ summary: 'Обновить тему' })
     @ApiOkResponse({ type: TopicResponseDto })
@@ -100,6 +114,10 @@ export class TopicsApiController {
         return this.topicsService.update(id, dto);
     }
 
+    @Roles(UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({ summary: 'Удалить тему' })
@@ -110,6 +128,7 @@ export class TopicsApiController {
         await this.topicsService.remove(id);
     }
 
+    @PublicAccess()
     @Get(':id/articles')
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить все статьи темы' })
@@ -140,6 +159,7 @@ export class TopicsApiController {
         };
     }
 
+    @PublicAccess()
     @Get(':id/articles/:articleId')
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить конкретную статью темы' })

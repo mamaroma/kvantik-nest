@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class UpdateUserDto {
     @ApiPropertyOptional({ example: 'reader@kvantik.local' })
@@ -16,6 +16,13 @@ export class UpdateUserDto {
     @IsString()
     @IsNotEmpty()
     name?: string;
+
+    @ApiPropertyOptional({ example: 'newStrongPass1' })
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(6)
+    password?: string;
 
     @ApiPropertyOptional({ enum: UserRole })
     @Transform(({ value }) => (value === '' ? undefined : value))

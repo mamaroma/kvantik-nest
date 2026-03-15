@@ -26,6 +26,10 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { UserRole } from '@prisma/client';
+import { ApiCookieAuth, ApiForbiddenResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { PublicAccess } from '../../auth/decorators/public-access.decorator';
+import { Roles } from '../../auth/decorators/roles.decorator';
 import { ArticleResponseDto, PaginatedArticlesResponseDto } from '../../articles/dto/article-response.dto';
 import { ArticlesService } from '../../articles/articles.service';
 import { ErrorResponseDto } from '../../common/dto/error-response.dto';
@@ -45,6 +49,7 @@ export class UsersApiController {
         private readonly articlesService: ArticlesService,
     ) {}
 
+    @PublicAccess()
     @Get()
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить список пользователей' })
@@ -71,6 +76,10 @@ export class UsersApiController {
         };
     }
 
+    @Roles(UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Post()
     @ApiOperation({ summary: 'Создать пользователя' })
     @ApiCreatedResponse({ type: UserResponseDto })
@@ -80,6 +89,7 @@ export class UsersApiController {
         return this.usersService.create(dto);
     }
 
+    @PublicAccess()
     @Get(':id')
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить пользователя по id' })
@@ -90,6 +100,10 @@ export class UsersApiController {
         return this.usersService.findOne(id);
     }
 
+    @Roles(UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Patch(':id')
     @ApiOperation({ summary: 'Обновить пользователя' })
     @ApiOkResponse({ type: UserResponseDto })
@@ -100,6 +114,10 @@ export class UsersApiController {
         return this.usersService.update(id, dto);
     }
 
+    @Roles(UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({ summary: 'Удалить пользователя' })
@@ -110,6 +128,7 @@ export class UsersApiController {
         await this.usersService.remove(id);
     }
 
+    @PublicAccess()
     @Get(':id/articles')
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить все статьи автора' })
@@ -140,6 +159,7 @@ export class UsersApiController {
         };
     }
 
+    @PublicAccess()
     @Get(':id/articles/:articleId')
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить конкретную статью автора' })

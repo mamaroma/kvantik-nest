@@ -1,11 +1,17 @@
+import { Request } from 'express';
+
 export type Session =
     | { isAuthed: false }
-    | { isAuthed: true; user: string };
+    | { isAuthed: true; user: string; email: string; role: string; userId: string };
 
-// В рамках лабораторных работ аутентификация имитируется через query-параметры.
-// Используется во всех MVC-контроллерах, чтобы прокидывать "сессию" в шаблоны.
-export function sessionFromQuery(query: { auth?: string; user?: string }): Session {
-    const isAuthed = query.auth === '1' || query.auth === 'true';
-    if (!isAuthed) return { isAuthed: false };
-    return { isAuthed: true, user: query.user?.trim() || 'Гость' };
+export function sessionFromRequest(req: Request): Session {
+    return req.authUser
+        ? {
+              isAuthed: true,
+              user: req.authUser.name,
+              email: req.authUser.email,
+              role: req.authUser.role,
+              userId: req.authUser.id,
+          }
+        : { isAuthed: false };
 }

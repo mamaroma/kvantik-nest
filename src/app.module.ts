@@ -3,6 +3,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
@@ -22,6 +23,15 @@ import './graphql/enums/graphql.enums';
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        AuthModule.register({
+            jwtSecret: process.env.AUTH_JWT_SECRET || 'dev-secret-change-me',
+            jwtExpiresIn: process.env.AUTH_JWT_EXPIRES_IN || '1d',
+            cookieName: process.env.AUTH_COOKIE_NAME || 'kvantik_auth',
+            cookieMaxAgeMs: Number(process.env.AUTH_COOKIE_MAX_AGE_MS || 86_400_000),
+            cookieSecure: process.env.AUTH_COOKIE_SECURE === 'true',
+            cookieSameSite: (process.env.AUTH_COOKIE_SAME_SITE as 'lax' | 'strict' | 'none') || 'lax',
+            loginPath: process.env.AUTH_LOGIN_PATH || '/auth/login',
+        }),
         CacheModule.register({
             isGlobal: true,
             ttl: 5_000,

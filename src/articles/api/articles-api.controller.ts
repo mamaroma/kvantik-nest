@@ -33,6 +33,10 @@ import {
     ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { Express, Request, Response } from 'express';
+import { UserRole } from '@prisma/client';
+import { ApiCookieAuth, ApiForbiddenResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { PublicAccess } from '../../auth/decorators/public-access.decorator';
+import { Roles } from '../../auth/decorators/roles.decorator';
 import { memoryStorage } from 'multer';
 import { ErrorResponseDto } from '../../common/dto/error-response.dto';
 import { buildPaginationMeta } from '../../common/pagination/pagination-meta.dto';
@@ -57,6 +61,7 @@ export class ArticlesApiController {
         private readonly topicsService: TopicsService,
     ) {}
 
+    @PublicAccess()
     @Get()
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить список статей' })
@@ -83,6 +88,10 @@ export class ArticlesApiController {
         };
     }
 
+    @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Post()
     @ApiOperation({ summary: 'Создать статью' })
     @ApiCreatedResponse({ type: ArticleResponseDto })
@@ -92,6 +101,7 @@ export class ArticlesApiController {
         return this.articlesService.create(dto);
     }
 
+    @PublicAccess()
     @Get(':id')
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить статью по id' })
@@ -102,6 +112,10 @@ export class ArticlesApiController {
         return this.articlesService.findOne(id);
     }
 
+    @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Post(':id/media')
     @UseInterceptors(
         FileInterceptor('file', {
@@ -130,6 +144,10 @@ export class ArticlesApiController {
         return this.articlesService.uploadMedia(id, file, caption);
     }
 
+    @Roles(UserRole.AUTHOR, UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Patch(':id')
     @ApiOperation({ summary: 'Обновить статью' })
     @ApiOkResponse({ type: ArticleResponseDto })
@@ -140,6 +158,10 @@ export class ArticlesApiController {
         return this.articlesService.update(id, dto);
     }
 
+    @Roles(UserRole.ADMIN)
+    @ApiCookieAuth('kvantik-auth')
+    @ApiUnauthorizedResponse({ type: ErrorResponseDto })
+    @ApiForbiddenResponse({ type: ErrorResponseDto })
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({ summary: 'Удалить статью' })
@@ -150,6 +172,7 @@ export class ArticlesApiController {
         await this.articlesService.remove(id);
     }
 
+    @PublicAccess()
     @Get(':id/author')
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить автора статьи' })
@@ -161,6 +184,7 @@ export class ArticlesApiController {
         return this.usersService.findOne(article.author.id);
     }
 
+    @PublicAccess()
     @Get(':id/topic')
     @Header('Cache-Control', 'public, max-age=60, must-revalidate')
     @ApiOperation({ summary: 'Получить тему статьи' })

@@ -6,12 +6,11 @@
 <body>
   <%- include('../partials/header', { activePage, session }) %>
 
-  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
 
   <main class="section-pad">
     <div class="kv-actions">
       <h2>Статьи</h2>
-      <a class="btn" href="/articles/add<%= suffix %>">+ Добавить</a>
+      <% if (session?.isAuthed && (session.role === 'AUTHOR' || session.role === 'ADMIN')) { %><a class="btn" href="/articles/add">+ Добавить</a><% } %>
     </div>
 
     <p class="muted">Обновления в реальном времени включены (SSE). Откройте эту страницу в двух вкладках и добавьте/измените статью — появится уведомление.</p>
@@ -24,7 +23,7 @@
       <article class="card article-card">
         <header class="article-card__head">
           <h3 class="article-card__title">
-            <a href="/articles/<%= a.id %><%= suffix %>"><%= a.title %></a>
+            <a href="/articles/<%= a.id %>"><%= a.title %></a>
           </h3>
           <div class="article-card__meta">
             <span class="chip"><%= a.status %></span>
@@ -39,12 +38,12 @@
           <p class="muted">(без краткого описания)</p>
         <% } %>
 
-        <div class="kv-actions">
-          <a class="btn btn--ghost" href="/articles/<%= a.id %>/edit<%= suffix %>">Редактировать</a>
-          <form method="POST" action="/articles/<%= a.id %>?_method=DELETE<%= suffix ? '&' + suffix.slice(1) : '' %>" onsubmit="return confirm('Удалить статью?');">
+        <% if (session?.isAuthed && (session.role === 'AUTHOR' || session.role === 'ADMIN')) { %><div class="kv-actions">
+          <a class="btn btn--ghost" href="/articles/<%= a.id %>/edit">Редактировать</a>
+          <% if (session.role === 'ADMIN') { %><form method="POST" action="/articles/<%= a.id %>?_method=DELETE" onsubmit="return confirm('Удалить статью?');">
             <button class="btn btn--danger" type="submit">Удалить</button>
-          </form>
-        </div>
+          </form><% } %>
+        </div><% } %>
       </article>
     <% }) %>
 

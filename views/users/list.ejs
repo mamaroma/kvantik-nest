@@ -6,12 +6,10 @@
 <body>
   <%- include('../partials/header', { activePage, session }) %>
 
-  <% const suffix = session?.isAuthed ? ('?auth=1&user=' + encodeURIComponent(session.user)) : ''; %>
-
   <main class="section-pad">
     <div class="kv-actions">
       <h2>Пользователи</h2>
-      <a class="btn" href="/users/add<%= suffix %>">+ Добавить</a>
+      <a class="btn" href="/users/add">+ Добавить</a>
     </div>
 
     <% if (!users.length) { %>
@@ -21,11 +19,11 @@
     <div class="grid">
       <% users.forEach((u) => { %>
         <div class="card">
-          <h3><a href="/users/<%= u.id %><%= suffix %>"><%= u.name %></a></h3>
+          <h3><a href="/users/<%= u.id %>"><%= u.name %></a></h3>
           <p class="muted"><%= u.email %> • <%= u.role %></p>
           <div class="kv-actions">
-            <a class="btn btn--ghost" href="/users/<%= u.id %>/edit<%= suffix %>">Редактировать</a>
-            <form method="POST" action="/users/<%= u.id %>?_method=DELETE<%= suffix ? '&' + suffix.slice(1) : '' %>" onsubmit="return confirm('Удалить пользователя?');">
+            <a class="btn btn--ghost" href="/users/<%= u.id %>/edit">Редактировать</a>
+            <form method="POST" action="/users/<%= u.id %>?_method=DELETE" onsubmit="return confirm('Удалить пользователя?');">
               <button class="btn btn--danger" type="submit">Удалить</button>
             </form>
           </div>
